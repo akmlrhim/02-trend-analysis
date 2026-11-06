@@ -1,0 +1,21 @@
+# Paket inti
+pandas
+numpy
+matplotlib
+seaborn
+
+# Analisis teks
+scikit-learn
+Sastrawi
+wordcloud
+
+# Pengambilan data Google Trends
+pytrends
+
+# Opsional (hapus tanda # jika dibutuhkan)
+# plotly
+# openpyxl
+# jupyterlab
+# nltk
+# transformers
+# torch

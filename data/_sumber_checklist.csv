@@ -1,0 +1,35 @@
+﻿dataset,sumber,status,jumlah_baris,tool_yang_dipakai,alasan_jika_gagal
+1,Google Trends - Trending now / Daily search trends (RSS geo=ID),berhasil,10,execute+fetch (RSS),
+1,Google Trends - Interest over time 12 bulan,berhasil,10,python pytrends,
+1,Google Trends - Interest over time 30 hari,gagal,0,python pytrends + scraping endpoint widget,"Google kembalikan 400/429 (rate limit); dicoba pytrends 2x, payload lebih kecil, dan scraping langsung trends.google.com - tetap 429"
+1,Google Trends - Related queries (Rising & Top),berhasil,55,python pytrends,
+1,Google Trends - Related topics,gagal,0,python pytrends,IndexError parsing pytrends (endpoint berubah); dicoba 2x
+1,Google Trends - Interest by region (provinsi),berhasil,5,python pytrends,
+1,Berita portal nasional (Google News RSS + Kompas/detik/CNBC/CNN/Kontan/Tirto),berhasil,26,"execute+fetch RSS, tavily",
+1,TikTok - Trend Discovery / Creative Center,sebagian,10,fetch API gagal (non-json); fallback agregator socialmediadefined.com + tavily extract,
+1,Instagram - hashtag & Reels trending,sebagian,2,tavily + agregator iqhashtags/Dash Social,Instagram tanpa API publik; data agregator global bukan khusus Indonesia
+1,X/Twitter - trending Indonesia,berhasil,19,fetch lagitren.id & getdaytrends.com (agregator publik),
+1,YouTube - trending Indonesia,sebagian,5,fetch + python requests + Playwright MCP + CreatorDB via tavily,youtube.com/feed/trending redirect ke home dan menuntut login (dicoba 3 jalur); data diambil dari agregator CreatorDB/youtrendings
+1,Reddit - thread ramai,sebagian,5,tavily (API langsung diblokir),"reddit.com & old.reddit JSON 403 untuk semua user-agent, termasuk python requests"
+1,Kaskus - thread ramai,sebagian,0,fetch + tavily,"Halaman utama SPA/JS, thread tidak ada di HTML; diambil via tavily untuk dataset 2"
+1,Marketplace (Tokopedia/Shopee) - kata kunci naik,sebagian,3,tavily (artikel analisis),"Data kategori tren dari artikel, bukan API marketplace"
+2,Google - People also ask / Pencarian terkait,sebagian,0,brightdata search_engine (Bing),PAA tidak diekspose di hasil SERP yang diterima
+2,Google - autocomplete,berhasil,125,execute+fetch suggest API (30 prefix),
+2,Google Trends - related queries berbentuk pertanyaan,berhasil,21,python pytrends,
+2,Reddit / forum,sebagian,5,tavily,API langsung 403; jalur alternatif pencarian
+2,Kaskus,sebagian,2,tavily,Halaman utama SPA/JS; thread via pencarian
+2,Quora,gagal,0,execute+fetch + tavily,Halaman topic dilayani tapi konten Q&A tidak terbaca tanpa login/JS; hasil pencarian tidak relevan
+2,Komentar publik YouTube/TikTok/Instagram,gagal,0,-,Butuh API platform/akun; tidak tersedia di tool
+2,Review pelanggan (Google Maps/Tokopedia/Shopee/Play Store),dilewati,0,-,Mode umum tanpa industri; review tanpa konteks produk tidak relevan
+5,Kalender libur resmi (SKB) via berita/agregator kalender,berhasil,11,tavily,
+5,Hari besar nasional & internasional,berhasil,16,"tavily (Kompas TV, MetroTVNews, Suara)",
+5,"Tanggal belanja e-commerce (11.11, 12.12, Harbolnas, Black Friday, gajian)",berhasil,8,tavily,
+5,Event industri/pameran/konser,berhasil,9,"tavily (ICE BSD, exposale, jadwalevent, CNBC)",
+5,Momen viral dari dataset 1,berhasil,0,terintegrasi ke catatan dataset 1,Tidak ada momen viral yang bisa dipastikan turun ke kalender 60 hari
+1,"Isu hangat terkini (Google News RSS tematik: karhutla, MBG, BSU, PHK, demo, penyadapan, samin tan, banjir, harga pangan)",berhasil,13,execute+fetch RSS query per topik,
+1,"Isu hangat terkini (tavily, filter time_range=week: demo mahasiswa, BPJS PBI, boikot selebriti, Binance hack, timnas, Shell)",berhasil,8,MCP tavily_search,
+2,"Pertanyaan turunan isu hangat (BPJS PBI, BSU, dry ice karhutla, banjir Jakarta, Gen Z demo, harga pangan, PHK/BPS)",berhasil,8,tavily + Google News RSS,
+1-2,"Pembersihan relevansi industri (agensi digital marketing): buang politik/kriminal/lingkungan/kesehatan, tambah isu industri (Meta ban iklan TikTok, IDM26, UU PDP, kreator, TikTok Awards) + 33 pertanyaan industri",berhasil,44,python csv + tavily + Google autocomplete,
+1-2,"Penyesuaian final relevansi: buang X trending politik, gadget konsumen (smartphone/HyperOS/iPhone), telko/internet konsumen, produk sisa; tambah MMA IMPACT 2026 (ad spend US$16,8 M proyeksi 2030) & TikTok Shop fashion +70%",berhasil,3,tavily + python csv,
+1,"Tempo.co (isu industri: takedown konten Komdigi, hak ekonomi era AI, pelatihan digital marketing)",berhasil,5,tavily include_domains + Google News RSS site:tempo.co,
+1,"Laporan Digital 2027 Indonesia via Campaign Indonesia + tren AI/data (akarberita, cedefindo) - semua MCP: tavily, brightdata, firecrawl, apify",berhasil,5,MCP tavily/brightdata/firecrawl/apify + tavily_extract,

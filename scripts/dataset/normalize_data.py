@@ -74,13 +74,4 @@ with open("data/tren_topik.csv", "w", newline="", encoding="utf-8-sig") as f:
 kosong_url1 = sum(1 for r in d1 if not r["source_url"])
 print(f"tren_topik.csv: {len(d1)} baris | sumber unik: {len({r['sumber'] for r in d1})} | source_url kosong: {kosong_url1}")
 
-# ---------- CHECKLIST: jumlah_baris numerik ----------
-HC = ["dataset", "sumber", "status", "jumlah_baris", "tool_yang_dipakai", "alasan_jika_gagal"]
-ck = list(csv.DictReader(open("data/_sumber_checklist.csv", encoding="utf-8-sig")))
-for r in ck:
-    v = r["jumlah_baris"].strip()
-    if "+" in v and all(p.strip().isdigit() for p in v.split("+")):
-        r["jumlah_baris"] = str(sum(int(p) for p in v.split("+")))
-with open("data/_sumber_checklist.csv", "w", newline="", encoding="utf-8-sig") as f:
-    w = csv.DictWriter(f, fieldnames=HC); w.writeheader(); w.writerows(ck)
-print(f"_sumber_checklist.csv: {len(ck)} baris | jumlah_baris kini semua numerik")
+print("Normalisasi selesai.")

@@ -13,7 +13,6 @@ PERIODE = "7 Okt - 6 Nov 2026"
 NETRAL = "#3D5A6C"
 AKSEN = "#C73E1D"
 SENTIMEN = {"positif": "#5B8C5A", "netral": "#9AA0A6", "negatif": "#C73E1D"}
-STATUS = {"berhasil": "#5B8C5A", "sebagian": "#D9A441", "gagal": "#C73E1D", "dilewati": "#B9BDC4"}
 KEYAKINAN = {"tinggi": "#5B8C5A", "sedang": "#D9A441", "rendah": "#C73E1D"}
 URGENSI = {"tinggi": "#C73E1D", "sedang": "#D9A441", "rendah": "#B9BDC4"}
 
@@ -24,16 +23,14 @@ def load_csv(name):
 
 
 tren = load_csv("tren_topik.csv")
-checklist = load_csv("_sumber_checklist.csv")
 isu = load_csv("isu_impost.csv")
 ide = load_csv("ide_konten_impost.csv")
 
 tren["tanggal_ambil"] = pd.to_datetime(tren["tanggal_ambil"], errors="coerce")
-checklist["jumlah_baris"] = pd.to_numeric(checklist["jumlah_baris"], errors="coerce")
 
 halaman = st.sidebar.radio(
     "Navigasi",
-    ["Ringkasan", "Isu & Ide Konten", "Tren Topik", "Sumber & Checklist"],
+    ["Ringkasan", "Isu & Ide Konten", "Tren Topik"],
 )
 st.sidebar.markdown("---")
 if st.sidebar.button("Muat ulang data", icon=":material/refresh:", key="btn_refresh_data"):
@@ -181,33 +178,6 @@ elif halaman == "Tren Topik":
             st.dataframe(d[["kategori", "topik", "kata_kunci", "sumber", "indikator_tren",
                             "skor_atau_volume", "sentimen", "source_url"]],
                          width='stretch', height=480)
-
-# ============ SUMBER & CHECKLIST ============
-else:
-    st.title("Sumber & Checklist")
-    st.caption("Satu baris per sumber wajib, termasuk tiap bagian Google Trends. Status gagal disertai alasannya.")
-
-    ds = st.selectbox("Dataset", sorted(checklist["dataset"].unique()))
-    d = checklist[checklist["dataset"] == ds]
-
-    st.markdown(
-        f"Dataset {ds}: **{int((d['status'] == 'berhasil').sum())} berhasil**, "
-        f"{int((d['status'] == 'sebagian').sum())} sebagian, "
-        f"{int((d['status'] == 'gagal').sum())} gagal, "
-        f"{int((d['status'] == 'dilewati').sum())} dilewati."
-    )
-
-    fig = px.bar(d.sort_values("jumlah_baris"), x="jumlah_baris", y="sumber", orientation="h",
-                 color="status", text="jumlah_baris", color_discrete_map=STATUS,
-                 category_orders={"status": ["berhasil", "sebagian", "gagal", "dilewati"]},
-                 title="Sumber mana yang berhasil, dan mana yang tidak?")
-    fig.update_layout(height=max(360, 30 * len(d) + 100), margin=dict(l=10, r=10, t=42, b=10))
-    fig.update_traces(textposition="outside")
-    st.plotly_chart(fig, width='stretch')
-
-    st.markdown("### Rincian per sumber")
-    st.dataframe(d[["sumber", "status", "jumlah_baris", "tool_yang_dipakai", "alasan_jika_gagal"]],
-                 width='stretch', height=420)
 
 st.sidebar.markdown("---")
 st.sidebar.caption("Riset: isu terverifikasi -> ide konten siap produksi. Data lama diarsipkan di data/_arsip/.")

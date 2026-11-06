@@ -12,8 +12,10 @@ wordcloud
 # Pengambilan data Google Trends
 pytrends
 
+# Visualisasi interaktif
+plotly
+
 # Opsional (hapus tanda # jika dibutuhkan)
-# plotly
 # openpyxl
 # jupyterlab
 # nltk

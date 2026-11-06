@@ -1,22 +1,24 @@
 # -*- coding: utf-8 -*-
-"""Dashboard riset tren konten. Data mentah: folder data/, diambil 6 Nov 2026."""
+"""Dashboard riset konten Impost Media. Data mentah: folder data/, riset terakhir 6 Nov 2026."""
 from datetime import timedelta
 
 import pandas as pd
 import plotly.express as px
 import streamlit as st
 
-st.set_page_config(page_title="Dashboard Riset Tren Konten", layout="wide")
+st.set_page_config(page_title="Riset Konten Impost Media", layout="wide")
 
 TGL_AMBIL = "6 Nov 2026"
+PERIODE = "7 Okt - 6 Nov 2026"
 
 # Palet: netral biru-abu sebagai dasar, satu aksen merah-bata untuk tren naik.
-# Warna semantik dipakai hanya untuk sentimen dan status sumber.
 NETRAL = "#3D5A6C"
 AKSEN = "#C73E1D"
 SENTIMEN = {"positif": "#5B8C5A", "netral": "#9AA0A6", "negatif": "#C73E1D"}
 STATUS = {"berhasil": "#5B8C5A", "sebagian": "#D9A441", "gagal": "#C73E1D", "dilewati": "#B9BDC4"}
 RELEVANSI = {"tinggi": "#C73E1D", "sedang": "#D9A441", "rendah": "#B9BDC4"}
+KEYAKINAN = {"tinggi": "#5B8C5A", "sedang": "#D9A441", "rendah": "#C73E1D"}
+URGENSI = {"tinggi": "#C73E1D", "sedang": "#D9A441", "rendah": "#B9BDC4"}
 
 
 @st.cache_data
@@ -28,19 +30,24 @@ tren = load_csv("tren_topik.csv")
 tanya = load_csv("pertanyaan_audiens.csv")
 kalender = load_csv("kalender_momen.csv")
 checklist = load_csv("_sumber_checklist.csv")
-refkonten = load_csv("referensi_konten.csv")
+isu = load_csv("isu_impost.csv")
+ide = load_csv("ide_konten_impost.csv")
+jadwal = load_csv("jadwal_posting.csv")
 
 for df in (tren, tanya):
     df["tanggal_ambil"] = pd.to_datetime(df["tanggal_ambil"], errors="coerce")
 kalender["tanggal_dt"] = pd.to_datetime(kalender["tanggal"], errors="coerce")
+jadwal["tanggal_dt"] = pd.to_datetime(jadwal["tanggal"], errors="coerce")
 checklist["jumlah_baris"] = pd.to_numeric(checklist["jumlah_baris"], errors="coerce")
 
 halaman = st.sidebar.radio(
     "Navigasi",
-    ["Ringkasan", "Tren Topik", "Pertanyaan Audiens", "Kalender Momen", "Acuan Konten", "Sumber & Checklist"],
+    ["Ringkasan", "Isu & Ide Konten", "Jadwal Posting", "Tren Topik",
+     "Pertanyaan Audiens", "Kalender Momen", "Sumber & Checklist"],
 )
 st.sidebar.markdown("---")
-st.sidebar.caption(f"Industri: agensi digital marketing / jasa digital. Data diambil {TGL_AMBIL}. File mentah ada di folder data/.")
+st.sidebar.caption(f"Riset untuk Impost Media (impostmedia.com), agensi digital marketing Kalsel. "
+                   f"Periode data {PERIODE}. Riset terakhir {TGL_AMBIL}.")
 
 
 def barh(df, kolom, pertanyaan, warna=NETRAL):
@@ -66,39 +73,116 @@ def pie_sentimen(df):
     return fig
 
 
+def badge(label, warna):
+    return f'<span style="background:{warna};color:white;padding:2px 10px;border-radius:12px;font-size:0.8em">{label}</span>'
+
+
+# ============ RINGKASAN ============
 if halaman == "Ringkasan":
-    st.title("Yang sedang hangat di Indonesia")
-    st.caption(f"Industri owner: agensi digital marketing / jasa digital. Data diambil {TGL_AMBIL}, geo Indonesia.")
+    st.title("Riset Konten Impost Media")
+    st.caption(f"Periode riset {PERIODE}. Disusun {TGL_AMBIL} untuk pemilik bisnis Kalsel & Indonesia - bahasa awam, semua klaim bersumber.")
 
-    st.markdown(
-        f"Dataset berisi **{len(tren)} baris tren** dari {tren['sumber'].nunique()} sumber, "
-        f"**{len(tanya)} pertanyaan audiens**, dan **{len(kalender)} momen** untuk 60 hari ke depan. "
-        f"Dari {len(checklist)} sumber yang dicoba, {int((checklist['status'] == 'berhasil').sum())} berhasil penuh."
-    )
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Isu terpilih", f"{len(isu)}", f"{int((isu['urgensi'] == 'tinggi').sum())} urgensi tinggi")
+    c2.metric("Ide konten siap produksi", len(ide))
+    c3.metric("Jadwal 2 minggu", len(jadwal))
+    c4.metric("Baris tren terkurasi", len(tren))
 
-    st.markdown("### Lima isu industri yang paling relevan")
-    hangat = tren[(tren["kategori"].isin(["industri_digital", "media_sosial", "e_commerce", "teknologi", "internet_budaya"]))
-                  & (tren["indikator_tren"] == "naik")].head(5)
-    for _, r in hangat.iterrows():
-        st.markdown(f"- **{r['topik']}** ({r['kategori'].replace('_', ' ')})")
+    st.markdown("### 5 isu terpilih (validasi 2+ sumber)")
+    for _, r in isu.sort_values("prioritas").iterrows():
+        st.markdown(
+            f"**{int(r['prioritas'])}. {r['judul']}**  \n"
+            f"{badge('urgensi: ' + r['urgensi'], URGENSI.get(r['urgensi'], NETRAL))} "
+            f"{badge('keyakinan: ' + r['keyakinan'], KEYAKINAN.get(r['keyakinan'], NETRAL))} "
+            f"{badge('layanan: ' + r['layanan_relevan'], NETRAL)}",
+            unsafe_allow_html=True,
+        )
 
     a, b = st.columns([3, 2])
     with a:
-        st.plotly_chart(barh(tren, "kategori", "Kategori apa yang paling banyak dibahas?"),
+        st.plotly_chart(barh(tren, "kategori", "Data pendukung paling banyak dari kategori mana?"),
                         width='stretch')
     with b:
         st.plotly_chart(pie_sentimen(tren), width='stretch')
 
-    st.plotly_chart(barh(tren, "indikator_tren", "Berapa banyak tren yang masih naik, dibanding stabil atau turun?", AKSEN),
+    st.plotly_chart(barh(tren, "indikator_tren",
+                         "Berapa banyak tren yang masih naik, dibanding stabil atau turun?", AKSEN),
                     width='stretch')
 
+# ============ ISU & IDE KONTEN ============
+elif halaman == "Isu & Ide Konten":
+    st.title("Isu & Ide Konten")
+    st.caption("Tiap isu tervalidasi 2+ sumber independen, lalu diubah jadi ide konten IG/TikTok siap produksi.")
+
+    pilihan = st.selectbox("Pilih isu", isu.sort_values("prioritas")["judul"], index=0)
+    r = isu[isu["judul"] == pilihan].iloc[0]
+    d_ide = ide[ide["id_isu"] == r["id_isu"]]
+
+    st.markdown(
+        f"### {r['judul']}  \n"
+        f"{badge('urgensi: ' + r['urgensi'], URGENSI.get(r['urgensi'], NETRAL))} "
+        f"{badge('keyakinan: ' + r['keyakinan'], KEYAKINAN.get(r['keyakinan'], NETRAL))} "
+        f"{badge('prioritas: ' + str(int(float(r['prioritas']))), NETRAL)}",
+        unsafe_allow_html=True,
+    )
+
+    tab1, tab2, tab3, tab4, tab5 = st.tabs(["Ringkasan", "Mengapa penting", "Data pendukung",
+                                            "Sudut unik", "Layanan & sumber"])
+    with tab1:
+        st.write(r["ringkasan"])
+    with tab2:
+        st.write(r["mengapa_peduli"])
+    with tab3:
+        st.write(r["data_pendukung"])
+        st.markdown(f"Sumber utama: [{r['sumber_utama']}]({r['source_url']})")
+    with tab4:
+        st.write(r["sudut_unik"])
+    with tab5:
+        st.markdown(f"**Layanan Impost Media yang relevan:** {r['layanan_relevan']}")
+
+    st.markdown(f"### Ide konten ({len(d_ide)})")
+    for _, i in d_ide.iterrows():
+        with st.expander(f"{i['platform']} - {i['format']}: **{i['nama_ide']}**"):
+            st.markdown(f"**Hook / slide pertama:**  \n> {i['hook']}")
+            st.markdown("**Poin isi:**")
+            for p in i["poin_isi"].split("|"):
+                st.markdown(f"- {p.strip()}")
+            st.markdown(f"**CTA:** {i['cta']}")
+            st.caption(f"Visual & audio: {i['visual_audio']}")
+
+    st.plotly_chart(barh(ide, "platform", "Ide terdistribusi ke platform apa?"), width='stretch')
+
+# ============ JADWAL POSTING ============
+elif halaman == "Jadwal Posting":
+    st.title("Jadwal Posting 2 Minggu")
+    st.caption(f"Urutan posting 7-20 Nov 2026, tersusun mengikuti urgensi isu dan momentum kalender.")
+
+    fig = px.timeline(jadwal, x_start="tanggal_dt", x_end=jadwal["tanggal_dt"] + timedelta(days=1),
+                      y="isu", color="platform", text="nama_ide",
+                      title="Kapan tiap konten tayang, diurut per isu?")
+    fig.update_yaxes(autorange="reversed")
+    fig.update_layout(height=420, margin=dict(l=10, r=10, t=42, b=10))
+    st.plotly_chart(fig, width='stretch')
+
+    st.markdown("### Daftar jadwal")
+    st.dataframe(jadwal[["tanggal", "nama_ide", "platform", "isu", "alasan"]],
+                 width='stretch', height=420)
+
+    st.markdown("### Detail tiap entri")
+    for _, j in jadwal.iterrows():
+        i = ide[ide["nama_ide"] == j["nama_ide"]]
+        hook = i.iloc[0]["hook"] if not i.empty else "-"
+        st.markdown(f"- **{j['tanggal']}** - {j['nama_ide']} ({j['platform']}) - *{j['alasan']}*  \n"
+                    f"  Hook: \"{hook}\"")
+
+# ============ TREN TOPIK ============
 elif halaman == "Tren Topik":
     st.title("Tren Topik")
-    st.caption("Pilih kategori dan sentimen untuk mempersempit topik yang naik.")
+    st.caption(f"Dataset terkurasi hasil riset {TGL_AMBIL}: hanya tren tervalidasi sumber, tanpa tren sekena. Pilih kategori dan sentimen untuk mempersempit.")
 
     f1, f2, f3 = st.columns(3)
     kat = f1.multiselect("Kategori", sorted(tren["kategori"].unique()),
-                         default=sorted(tren["kategori"].unique())[:8])
+                         default=sorted(tren["kategori"].unique()))
     sen = f2.multiselect("Sentimen", sorted(tren["sentimen"].unique()),
                          default=sorted(tren["sentimen"].unique()))
     ind = f3.multiselect("Arah tren", sorted(tren["indikator_tren"].unique()),
@@ -124,11 +208,12 @@ elif halaman == "Tren Topik":
             st.dataframe(naik[["kategori", "topik", "kata_kunci", "skor_atau_volume", "sentimen", "sumber", "source_url"]],
                          width='stretch', height=380)
 
-        with st.expander("Semua baris dataset 1"):
+        with st.expander("Semua baris dataset"):
             st.dataframe(d[["kategori", "topik", "kata_kunci", "sumber", "indikator_tren",
                             "skor_atau_volume", "sentimen", "source_url"]],
                          width='stretch', height=480)
 
+# ============ PERTANYAAN AUDIENS ============
 elif halaman == "Pertanyaan Audiens":
     st.title("Pertanyaan Audiens")
     st.caption("Pertanyaan dan keluhan yang benar-benar dicari orang, untuk menentukan topik konten yang menjawabnya.")
@@ -156,6 +241,7 @@ elif halaman == "Pertanyaan Audiens":
                         "frekuensi_atau_jumlah_mention", "source_url"]],
                      width='stretch', height=460)
 
+# ============ KALENDER MOMEN ============
 elif halaman == "Kalender Momen":
     st.title("Kalender Momen 60 Hari")
     st.caption("Momen yang layak disiapkan lebih awal, dari 7 Nov 2026 sampai 5 Jan 2027. Warna menunjukkan relevansi.")
@@ -192,33 +278,7 @@ elif halaman == "Kalender Momen":
         st.dataframe(d[["tanggal", "nama_momen", "jenis", "relevansi", "catatan", "source_url"]],
                      width='stretch', height=420)
 
-elif halaman == "Acuan Konten":
-    st.title("Acuan Konten")
-    st.caption(f"Pemetaan isu terverifikasi menjadi sudut konten siap produksi. Dibuat {TGL_AMBIL}; setiap baris terhubung ke sumber datanya.")
-
-    f1, f2 = st.columns(2)
-    kat = f1.multiselect("Kategori", sorted(refkonten["kategori"].unique()), default=sorted(refkonten["kategori"].unique()))
-    fmt = f2.multiselect("Format", sorted(refkonten["format_saran"].unique()), default=sorted(refkonten["format_saran"].unique()))
-    d = refkonten[refkonten["kategori"].isin(kat) & refkonten["format_saran"].isin(fmt)]
-
-    st.markdown(
-        f"**{len(d)} sudut konten** siap produksi. Yang paling mendesak: isu iklan silang Meta-TikTok dan "
-        "kampanye Harbolnas 12.12, karena keduanya punya batas waktu."
-    )
-
-    st.plotly_chart(barh(d, "format_saran", "Format konten apa yang paling banyak disarankan?", NETRAL),
-                    width='stretch')
-
-    st.markdown("### Daftar sudut konten")
-    st.dataframe(d[["kategori", "isu_data", "sudut_konten", "format_saran", "momen_kalender", "sumber_data", "source_url"]],
-                 width='stretch', height=480)
-
-    berjeda = d[d["momen_kalender"] != "-"]
-    if not berjeda.empty:
-        st.markdown("### Punya batas waktu (terkait momen kalender)")
-        for _, r in berjeda.iterrows():
-            st.markdown(f"- **{r['momen_kalender']}**: {r['sudut_konten']}")
-
+# ============ SUMBER & CHECKLIST ============
 else:
     st.title("Sumber & Checklist")
     st.caption("Satu baris per sumber wajib, termasuk tiap bagian Google Trends. Status gagal disertai alasannya.")
@@ -246,4 +306,4 @@ else:
                  width='stretch', height=420)
 
 st.sidebar.markdown("---")
-st.sidebar.caption("Data mentah untuk perencanaan konten, bukan ide konten jadi.")
+st.sidebar.caption(f"Riset: isu terverifikasi -> ide konten -> jadwal. Data lama diarsipkan di data/_arsip/.")

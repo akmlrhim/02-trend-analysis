@@ -75,7 +75,7 @@ if halaman == "Ringkasan":
     c1.metric("Isu terpilih", f"{len(isu)}", f"{int((isu['urgensi'] == 'tinggi').sum())} urgensi tinggi")
     c2.metric("Baris tren terkurasi", len(tren))
 
-    st.markdown("### 5 isu terpilih (validasi 2+ sumber)")
+    st.markdown(f"### {len(isu)} isu terpilih (validasi 2+ sumber)")
     for _, r in isu.sort_values("prioritas").iterrows():
         st.markdown(
             f"**{int(r['prioritas'])}. {r['judul']}**  \n"

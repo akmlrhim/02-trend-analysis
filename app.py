@@ -24,13 +24,12 @@ def load_csv(name):
 
 tren = load_csv("tren_topik.csv")
 isu = load_csv("isu_impost.csv")
-ide = load_csv("ide_konten_impost.csv")
 
 tren["tanggal_ambil"] = pd.to_datetime(tren["tanggal_ambil"], errors="coerce")
 
 halaman = st.sidebar.radio(
     "Navigasi",
-    ["Ringkasan", "Isu & Ide Konten", "Tren Topik"],
+    ["Ringkasan", "Isu Terpilih", "Tren Topik"],
 )
 st.sidebar.markdown("---")
 if st.sidebar.button("Muat ulang data", icon=":material/refresh:", key="btn_refresh_data"):
@@ -72,10 +71,9 @@ if halaman == "Ringkasan":
     st.title("Riset Konten Impost Media")
     st.caption(f"Periode riset {PERIODE}. Disusun {TGL_AMBIL} untuk pemilik bisnis Kalsel & Indonesia.")
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2 = st.columns(2)
     c1.metric("Isu terpilih", f"{len(isu)}", f"{int((isu['urgensi'] == 'tinggi').sum())} urgensi tinggi")
-    c2.metric("Ide konten siap produksi", len(ide))
-    c3.metric("Baris tren terkurasi", len(tren))
+    c2.metric("Baris tren terkurasi", len(tren))
 
     st.markdown("### 5 isu terpilih (validasi 2+ sumber)")
     for _, r in isu.sort_values("prioritas").iterrows():
@@ -98,14 +96,13 @@ if halaman == "Ringkasan":
                          "Berapa banyak tren yang masih naik, dibanding stabil atau turun?", AKSEN),
                     width='stretch')
 
-# ============ ISU & IDE KONTEN ============
-elif halaman == "Isu & Ide Konten":
-    st.title("Isu & Ide Konten")
-    st.caption("Tiap isu tervalidasi 2+ sumber independen, lalu diubah jadi ide konten IG/TikTok siap produksi.")
+# ============ ISU TERPILIH ============
+elif halaman == "Isu Terpilih":
+    st.title("Isu Terpilih")
+    st.caption("Tiap isu tervalidasi 2+ sumber independen dan diurut berdasarkan prioritas.")
 
     pilihan = st.selectbox("Pilih isu", isu.sort_values("prioritas")["judul"], index=0)
     r = isu[isu["judul"] == pilihan].iloc[0]
-    d_ide = ide[ide["id_isu"] == r["id_isu"]]
 
     st.markdown(
         f"### {r['judul']}  \n"
@@ -128,18 +125,6 @@ elif halaman == "Isu & Ide Konten":
         st.write(r["sudut_unik"])
     with tab5:
         st.markdown(f"**Layanan Impost Media yang relevan:** {r['layanan_relevan']}")
-
-    st.markdown(f"### Ide konten ({len(d_ide)})")
-    for _, i in d_ide.iterrows():
-        with st.expander(f"{i['platform']} - {i['format']}: **{i['nama_ide']}**"):
-            st.markdown(f"**Hook / slide pertama:**  \n> {i['hook']}")
-            st.markdown("**Poin isi:**")
-            for p in i["poin_isi"].split("|"):
-                st.markdown(f"- {p.strip()}")
-            st.markdown(f"**CTA:** {i['cta']}")
-            st.caption(f"Visual & audio: {i['visual_audio']}")
-
-    st.plotly_chart(barh(ide, "platform", "Ide terdistribusi ke platform apa?"), width='stretch')
 
 # ============ TREN TOPIK ============
 elif halaman == "Tren Topik":

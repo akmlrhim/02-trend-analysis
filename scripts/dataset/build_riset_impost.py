@@ -101,50 +101,48 @@ add("media_sosial", "Reels <90 detik dengan jump cut tiap 3-5 detik: engagement 
 add("media_sosial", "Reels pakai trending audio: engagement +42%; reach rate rata-rata Reels 30,81%",
     "trending audio; reach reels", "Statistik industri (loopexdigital/demandsage 2026)", "naik", 42, "netral",
     "https://www.loopexdigital.com/blog/instagram-reels-statistics")
-add("media_sosial", "Hashtag Instagram: #reelsindonesia (844,6K post/hari, total 1,1 M post)",
-    "reelsindonesia; reelsinstagram", "Instagram Hashtag (agregator iqhashtags)", "naik", 844600, "netral",
-    "https://iqhashtags.com/hashtags/hashtag/reelsindonesia")
-add("media_sosial", "Hashtag Instagram: #reelsinstagram (553,7M post, 247,6K/hari)",
-    "reelsinstagram", "Instagram Hashtag (agregator iqhashtags)", "stabil", 247600, "netral",
-    "https://iqhashtags.com/hashtags/hashtag/reelsindonesia")
-add("media_sosial", "Hashtag Instagram: #umkmindonesia (3,3M post, avg likes 4,3K - niche UMKM terbuka)",
-    "umkmindonesia; umkmnaikkelas", "Instagram Hashtag (agregator iqhashtags)", "stabil", 3300000, "positif",
-    "https://iqhashtags.com/hashtags/hashtag/umkmindonesia")
 add("media_sosial", "Kategori Reels Instagram naik: interior & home decor (26,7K post, Okt 2026)",
     "interiordesign; homedecor", "Instagram Hashtag (agregator Dash Social)", "naik", 26700, "netral",
     "https://www.dashsocial.com/blog/instagram-hashtags")
 
-# --- Rising queries Google Trends (kurasi: buang downloader/anon viewer) ---
+# --- Rising queries Google Trends (dikelompokkan menjadi judul narasi, bukan tag mentah) ---
 raw = json.load(open("data/_instagram_trends_raw.json", encoding="utf-8"))
-SIMPAN = ("instagram reels", "instagram story", "feed instagram", "konten instagram",
-          "capcut template", "trending audio", "hashtag instagram", "instagram bio")
-BUANG = ("download", "downloader", "save.net", "save ", "viewer", "anonim", "anonymously", "snaptik", "convertidor", "mp4", "watermark")
-n_rising = 0
+BUANG = ("download", "downloader", "save.net", "save ", "viewer", "anonim", "anonymously", "snaptik", "convertidor", "mp4", "watermark", "news")
+queries = []
 for kw, d in raw.get("related_queries", {}).items():
     if not isinstance(d, dict) or d.get("error"):
         continue
     for r in (d.get("rising") or []):
         q = r.get("query", "").strip()
-        if not q or any(b in q.lower() for b in BUANG):
-            continue
-        add("media_sosial", f"Instagram rising: {q}", kw,
-            "Google Trends (Related Queries - Rising)", "naik", "", "netral",
-            "https://trends.google.com/trends/explore?geo=ID")
-        n_rising += 1
+        if q and not any(b in q.lower() for b in BUANG):
+            queries.append(q)
 
-# --- Interest 12 bulan yang naik ---
+GRUP_NARASI = [
+    (("capcut",), "Pencarian CapCut template untuk Reels naik tajam di Google Trends Indonesia"),
+    (("bio",), "Optimasi bio Instagram jadi kebutuhan: cara menulis bio, emoji, aesthetic bio maker"),
+    (("trial reels",), "Fitur Trial Reels Instagram mulai banyak dicari kreator"),
+    (("ratio", "ukuran feed"), "Ukuran & rasio konten Instagram dicari naik: reels ratio, ukuran feed 2026"),
+]
+for kunci, narasi in GRUP_NARASI:
+    cocok = [q for q in queries if any(k in q.lower() for k in kunci)]
+    if cocok:
+        add("media_sosial", narasi, "; ".join(cocok[:5]),
+            "Google Trends (Related Queries - Rising)", "naik", len(cocok), "netral",
+            "https://trends.google.com/trends/explore?geo=ID")
+
+# --- Interest 12 bulan yang naik (ditulis sebagai narasi) ---
 for k, d in raw.items():
     if not k.startswith("iot12_") or k.endswith("_error"):
         continue
     for kw, m in d.items():
         if m["last"] > m["first"] * 1.15:
-            add("media_sosial", f"Interest 12 bulan: {kw} ({int(m['first'])} -> {int(m['last'])})",
+            add("media_sosial", f"Minat pencarian '{kw}' naik dalam 12 bulan terakhir (skor {int(m['first'])} -> {int(m['last'])})",
                 kw, "Google Trends (Interest Over Time)", "naik", int(m["avg"]), "netral",
                 "https://trends.google.com/trends/explore?geo=ID")
 
 with open("data/tren_topik.csv", "w", newline="", encoding="utf-8-sig") as f:
     w = csv.DictWriter(f, fieldnames=H1); w.writeheader(); w.writerows(rows)
-print(f"tren_topik.csv baru: {len(rows)} baris ({n_rising} rising terkurasi)")
+print(f"tren_topik.csv baru: {len(rows)} baris (semua topik berformat judul narasi)")
 
 # ---------- 3. isu_impost.csv ----------
 HI = ["id_isu", "judul", "ringkasan", "mengapa_peduli", "data_pendukung", "layanan_relevan",

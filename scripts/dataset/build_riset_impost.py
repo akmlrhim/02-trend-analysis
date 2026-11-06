@@ -2,7 +2,7 @@
 """Ganti dataset dengan hasil riset terbaru Impost Media (6 Nov 2026).
 - Arsipkan tren_topik.csv & referensi_konten.csv lama ke data/_arsip/
 - Tulis tren_topik.csv baru (kurasi tervalidasi)
-- Tulis isu_impost.csv, ide_konten_impost.csv, jadwal_posting.csv
+- Tulis isu_impost.csv, ide_konten_impost.csv
 Jalankan dari root: python scripts/dataset/build_riset_impost.py"""
 import csv, os, shutil, json, sys
 sys.stdout.reconfigure(encoding="utf-8", errors="replace")
@@ -300,20 +300,3 @@ ide = [
 with open("data/ide_konten_impost.csv", "w", newline="", encoding="utf-8-sig") as f:
     w = csv.DictWriter(f, fieldnames=HD); w.writeheader(); w.writerows([dict(zip(HD, r)) for r in ide])
 print(f"ide_konten_impost.csv: {len(ide)} ide konten")
-
-# ---------- 5. jadwal_posting.csv ----------
-HJ = ["tanggal", "isi_konten", "nama_ide", "platform", "isu", "alasan"]
-jadwal = [
-    ("2026-11-07", "TikTok Checklist Darurat 11.11", "H-3 11.11: Checklist Darurat Buat Bisnis Kecil", "TikTok", "11.11 / Q4", "momentum H-4"),
-    ("2026-11-08", "IG Carousel Ikut 11.11 Tanpa Perang Diskon", "Ikut 11.11 Tanpa Perang Diskon", "Instagram Carousel", "11.11 / Q4", "weekend belanja"),
-    ("2026-11-10", "IG Reels Skit Skip 11.11", "Yang Terjadi Kalau Kamu Skip 11.11", "Instagram Reels", "11.11 / Q4", "H-1 urgency"),
-    ("2026-11-12", "IG Carousel Meta Larang Iklan TikTok", "Iklanmu Bisa Ditolak Meta. Cek 3 Hal Ini", "Instagram Carousel", "Meta-TikTok", "pasca gelombang belanja, budget di-review"),
-    ("2026-11-13", "TikTok Perang Platform", "Perang Platform, Kamu yang Kena", "TikTok", "Meta-TikTok", "sebar ke audiens baru"),
-    ("2026-11-15", "IG Reels 3 Funnel Aman Meta", "3 Funnel yang Aman dari Kebijakan Meta", "Instagram Reels", "Meta-TikTok", "CTA kuat weekend"),
-    ("2026-11-17", "IG Carousel 5 Angka Digital 2027", "5 Angka Laporan Baru yang Menentukan Bisnismu 2027", "Instagram Carousel", "Digital 2027", "data segar, awal minggu B2B"),
-    ("2026-11-19", "TikTok 240 Juta Peluang atau Jebakan", "TikTok 240 Juta Pengguna: Peluang atau Jebakan?", "TikTok", "Digital 2027", "jaga ritme TikTok"),
-    ("2026-11-20", "IG Reels Digital Marketing Bukan Konten Viral", "Digital Marketing Itu Bukan Konten Viral", "Instagram Reels", "UMKM Kalsel", "tutup 2 minggu dengan positioning lokal"),
-]
-with open("data/jadwal_posting.csv", "w", newline="", encoding="utf-8-sig") as f:
-    w = csv.DictWriter(f, fieldnames=HJ); w.writeheader(); w.writerows([dict(zip(HJ, r)) for r in jadwal])
-print(f"jadwal_posting.csv: {len(jadwal)} entri")

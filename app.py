@@ -32,17 +32,15 @@ kalender = load_csv("kalender_momen.csv")
 checklist = load_csv("_sumber_checklist.csv")
 isu = load_csv("isu_impost.csv")
 ide = load_csv("ide_konten_impost.csv")
-jadwal = load_csv("jadwal_posting.csv")
 
 for df in (tren, tanya):
     df["tanggal_ambil"] = pd.to_datetime(df["tanggal_ambil"], errors="coerce")
 kalender["tanggal_dt"] = pd.to_datetime(kalender["tanggal"], errors="coerce")
-jadwal["tanggal_dt"] = pd.to_datetime(jadwal["tanggal"], errors="coerce")
 checklist["jumlah_baris"] = pd.to_numeric(checklist["jumlah_baris"], errors="coerce")
 
 halaman = st.sidebar.radio(
     "Navigasi",
-    ["Ringkasan", "Isu & Ide Konten", "Jadwal Posting", "Tren Topik",
+    ["Ringkasan", "Isu & Ide Konten", "Tren Topik",
      "Pertanyaan Audiens", "Kalender Momen", "Sumber & Checklist"],
 )
 st.sidebar.markdown("---")
@@ -85,11 +83,10 @@ if halaman == "Ringkasan":
     st.title("Riset Konten Impost Media")
     st.caption(f"Periode riset {PERIODE}. Disusun {TGL_AMBIL} untuk pemilik bisnis Kalsel & Indonesia - bahasa awam, semua klaim bersumber.")
 
-    c1, c2, c3, c4 = st.columns(4)
+    c1, c2, c3 = st.columns(3)
     c1.metric("Isu terpilih", f"{len(isu)}", f"{int((isu['urgensi'] == 'tinggi').sum())} urgensi tinggi")
     c2.metric("Ide konten siap produksi", len(ide))
-    c3.metric("Jadwal 2 minggu", len(jadwal))
-    c4.metric("Baris tren terkurasi", len(tren))
+    c3.metric("Baris tren terkurasi", len(tren))
 
     st.markdown("### 5 isu terpilih (validasi 2+ sumber)")
     for _, r in isu.sort_values("prioritas").iterrows():
@@ -154,29 +151,6 @@ elif halaman == "Isu & Ide Konten":
             st.caption(f"Visual & audio: {i['visual_audio']}")
 
     st.plotly_chart(barh(ide, "platform", "Ide terdistribusi ke platform apa?"), width='stretch')
-
-# ============ JADWAL POSTING ============
-elif halaman == "Jadwal Posting":
-    st.title("Jadwal Posting 2 Minggu")
-    st.caption(f"Urutan posting 7-20 Nov 2026, tersusun mengikuti urgensi isu dan momentum kalender.")
-
-    fig = px.timeline(jadwal, x_start="tanggal_dt", x_end=jadwal["tanggal_dt"] + timedelta(days=1),
-                      y="isu", color="platform", text="nama_ide",
-                      title="Kapan tiap konten tayang, diurut per isu?")
-    fig.update_yaxes(autorange="reversed")
-    fig.update_layout(height=420, margin=dict(l=10, r=10, t=42, b=10))
-    st.plotly_chart(fig, width='stretch')
-
-    st.markdown("### Daftar jadwal")
-    st.dataframe(jadwal[["tanggal", "nama_ide", "platform", "isu", "alasan"]],
-                 width='stretch', height=420)
-
-    st.markdown("### Detail tiap entri")
-    for _, j in jadwal.iterrows():
-        i = ide[ide["nama_ide"] == j["nama_ide"]]
-        hook = i.iloc[0]["hook"] if not i.empty else "-"
-        st.markdown(f"- **{j['tanggal']}** - {j['nama_ide']} ({j['platform']}) - *{j['alasan']}*  \n"
-                    f"  Hook: \"{hook}\"")
 
 # ============ TREN TOPIK ============
 elif halaman == "Tren Topik":
@@ -309,4 +283,4 @@ else:
                  width='stretch', height=420)
 
 st.sidebar.markdown("---")
-st.sidebar.caption(f"Riset: isu terverifikasi -> ide konten -> jadwal. Data lama diarsipkan di data/_arsip/.")
+st.sidebar.caption("Riset: isu terverifikasi -> ide konten siap produksi. Data lama diarsipkan di data/_arsip/.")

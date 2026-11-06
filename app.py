@@ -69,7 +69,6 @@ def badge(label, warna):
 # ============ RINGKASAN ============
 if halaman == "Ringkasan":
     st.title("Riset Konten Impost Media")
-    st.caption(f"Periode riset {PERIODE}. Disusun {TGL_AMBIL} untuk pemilik bisnis Kalsel & Indonesia.")
 
     c1, c2 = st.columns(2)
     c1.metric("Isu terpilih", f"{len(isu)}", f"{int((isu['urgensi'] == 'tinggi').sum())} urgensi tinggi")

@@ -74,30 +74,6 @@ with open("data/tren_topik.csv", "w", newline="", encoding="utf-8-sig") as f:
 kosong_url1 = sum(1 for r in d1 if not r["source_url"])
 print(f"tren_topik.csv: {len(d1)} baris | sumber unik: {len({r['sumber'] for r in d1})} | source_url kosong: {kosong_url1}")
 
-# ---------- DATASET 2: pertanyaan_audiens.csv ----------
-H2 = ["tanggal_ambil", "kategori", "pertanyaan_atau_keluhan", "sumber", "frekuensi_atau_jumlah_mention", "source_url"]
-d2 = list(csv.DictReader(open("data/pertanyaan_audiens.csv", encoding="utf-8-sig")))
-
-def norm_sumber2(s):
-    s2 = s.lower()
-    if "autocomplete" in s2: return "Google Autocomplete"
-    if "trends" in s2 and "related" in s2: return "Google Trends (Related Queries)"
-    if "reddit" in s2: return "Reddit r/indonesia"
-    if "kaskus" in s2: return "Kaskus"
-    if "google news" in s2: return "Google News RSS"
-    return "Berita industri (via tavily)"
-
-for r in d2:
-    r["tanggal_ambil"] = TGL
-    r["kategori"] = r["kategori"].strip().lower()
-    r["sumber"] = norm_sumber2(r["sumber"])
-    r["frekuensi_atau_jumlah_mention"] = r["frekuensi_atau_jumlah_mention"].replace("%", "").strip()
-
-with open("data/pertanyaan_audiens.csv", "w", newline="", encoding="utf-8-sig") as f:
-    w = csv.DictWriter(f, fieldnames=H2); w.writeheader(); w.writerows(d2)
-kosong_url2 = sum(1 for r in d2 if not r["source_url"])
-print(f"pertanyaan_audiens.csv: {len(d2)} baris | sumber unik: {len({r['sumber'] for r in d2})} | source_url kosong: {kosong_url2}")
-
 # ---------- CHECKLIST: jumlah_baris numerik ----------
 HC = ["dataset", "sumber", "status", "jumlah_baris", "tool_yang_dipakai", "alasan_jika_gagal"]
 ck = list(csv.DictReader(open("data/_sumber_checklist.csv", encoding="utf-8-sig")))

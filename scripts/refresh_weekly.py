@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """Refresh mingguan data tren untuk agensi digital marketing.
-Mengambil data baru (trends, berita industri, X/TikTok trending, autocomplete),
+Mengambil data baru (trends, berita industri, X/TikTok trending),
 menambahkan baris relevan-industri ke CSV yang sudah ada (dengan dedupe),
 lalu menormalisasi format. File checklist tidak diubah.
 Jalankan dari root: python scripts/refresh_weekly.py
@@ -14,7 +14,6 @@ TGL = date.today().isoformat()
 
 UA = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"}
 H1 = ["tanggal_ambil", "kategori", "topik", "kata_kunci", "sumber", "indikator_tren", "skor_atau_volume", "sentimen", "source_url"]
-H2 = ["tanggal_ambil", "kategori", "pertanyaan_atau_keluhan", "sumber", "frekuensi_atau_jumlah_mention", "source_url"]
 
 def get(url):
     req = urllib.request.Request(url, headers=UA)
@@ -79,21 +78,6 @@ def tiktok_trending():
         print(f"  TikTok trending gagal: {e}")
         return []
 
-def autocomplete():
-    """Pertanyaan industri dari Google autocomplete (prefix tetap)."""
-    prefixes = ["cara iklan", "tiktok affiliate", "cara naikkan followers", "umkm online",
-                "jasa buat website", "digital marketing", "cara promosi", "meta ads"]
-    hasil = []
-    for p in prefixes:
-        try:
-            t = get(f"https://suggestqueries.google.com/complete/search?client=firefox&hl=id&gl=ID&q={urllib.parse.quote(p)}")
-            for s in re.findall(r'"([^"]{6,80})"', t)[1:6]:
-                if s != p and not s.startswith("ERROR"):
-                    hasil.append(s)
-        except Exception as e:
-            print(f"  autocomplete '{p}' gagal: {e}")
-    return hasil[:25]
-
 def tambah_baris(path, header, baris_baru, kunci):
     with open(path, encoding="utf-8-sig") as f:
         rows = list(csv.DictReader(f))
@@ -144,16 +128,7 @@ for u, v in tiktok_trending():
 n1, tot1 = tambah_baris("data/tren_topik.csv", H1, d1_baru, ["kategori", "topik"])
 print(f"  tren_topik.csv: +{n1} baris baru (total {tot1})")
 
-# 5. Autocomplete
-print("5) Autocomplete industri...")
-UA2 = "https://suggestqueries.google.com/complete/search?client=firefox&hl=id&gl=ID&q="
-d2_baru = []
-for s in autocomplete():
-    d2_baru.append(dict(zip(H2, (TGL, "industri_digital", s, "Google Autocomplete", "", UA2 + urllib.parse.quote(s.replace(" ", "+"))))))
-n2, tot2 = tambah_baris("data/pertanyaan_audiens.csv", H2, d2_baru, ["pertanyaan_atau_keluhan"])
-print(f"  pertanyaan_audiens.csv: +{n2} baris baru (total {tot2})")
-
-# 6. Normalisasi format
-print("6) Normalisasi...")
+# 5. Normalisasi format
+print("5) Normalisasi...")
 subprocess.run([sys.executable, "scripts/dataset/normalize_data.py"], check=True, timeout=120)
 print("Selesai. Dashboard akan memuat data baru saat dibuka ulang (cache Streamlit per URL proses).")

@@ -24,19 +24,16 @@ def load_csv(name):
 
 
 tren = load_csv("tren_topik.csv")
-tanya = load_csv("pertanyaan_audiens.csv")
 checklist = load_csv("_sumber_checklist.csv")
 isu = load_csv("isu_impost.csv")
 ide = load_csv("ide_konten_impost.csv")
 
-for df in (tren, tanya):
-    df["tanggal_ambil"] = pd.to_datetime(df["tanggal_ambil"], errors="coerce")
+tren["tanggal_ambil"] = pd.to_datetime(tren["tanggal_ambil"], errors="coerce")
 checklist["jumlah_baris"] = pd.to_numeric(checklist["jumlah_baris"], errors="coerce")
 
 halaman = st.sidebar.radio(
     "Navigasi",
-    ["Ringkasan", "Isu & Ide Konten", "Tren Topik",
-     "Pertanyaan Audiens", "Sumber & Checklist"],
+    ["Ringkasan", "Isu & Ide Konten", "Tren Topik", "Sumber & Checklist"],
 )
 st.sidebar.markdown("---")
 if st.sidebar.button("Muat ulang data", icon=":material/refresh:", key="btn_refresh_data"):
@@ -184,34 +181,6 @@ elif halaman == "Tren Topik":
             st.dataframe(d[["kategori", "topik", "kata_kunci", "sumber", "indikator_tren",
                             "skor_atau_volume", "sentimen", "source_url"]],
                          width='stretch', height=480)
-
-# ============ PERTANYAAN AUDIENS ============
-elif halaman == "Pertanyaan Audiens":
-    st.title("Pertanyaan Audiens")
-    st.caption("Pertanyaan dan keluhan yang benar-benar dicari orang, untuk menentukan topik konten yang menjawabnya.")
-
-    f1, f2 = st.columns(2)
-    kat = f1.multiselect("Kategori", sorted(tanya["kategori"].unique()),
-                         default=sorted(tanya["kategori"].unique())[:10])
-    src = f2.multiselect("Sumber", sorted(tanya["sumber"].unique()),
-                         default=sorted(tanya["sumber"].unique()))
-    d = tanya[tanya["kategori"].isin(kat) & tanya["sumber"].isin(src)]
-
-    if d.empty:
-        st.info("Tidak ada pertanyaan yang cocok dengan filter ini. Coba tambahkan kategori atau sumber.")
-    else:
-        a, b = st.columns(2)
-        with a:
-            st.plotly_chart(barh(d, "kategori", f"Topik apa yang paling sering ditanyakan? ({len(d)} baris)", NETRAL),
-                            width='stretch')
-        with b:
-            st.plotly_chart(barh(d, "sumber", "Dari sumber mana pertanyaan itu datang?"),
-                            width='stretch')
-
-        st.markdown(f"### Daftar pertanyaan ({len(d)} baris)")
-        st.dataframe(d[["kategori", "pertanyaan_atau_keluhan", "sumber",
-                        "frekuensi_atau_jumlah_mention", "source_url"]],
-                     width='stretch', height=460)
 
 # ============ SUMBER & CHECKLIST ============
 else:

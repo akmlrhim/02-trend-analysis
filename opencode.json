@@ -1,0 +1,51 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "brightdata": {
+        "type": "local",
+        "command": [
+          "cmd",
+          "/c",
+          "npx",
+          "-y",
+          "@brightdata/mcp"
+        ],
+        "environment": {
+          "API_TOKEN": "{env:BRIGHTDATA_API_KEY}"
+        },
+        "timeout": {
+          "startup": 120000,
+          "execution": 300000
+        }
+      },
+      "tavily": {
+        "type": "remote",
+        "url": "https://mcp.tavily.com/mcp"
+      },
+      "firecrawl": {
+        "type": "remote",
+        "url": "https://mcp.firecrawl.dev/v2/mcp",
+        "oauth": false,
+        "headers": {
+          "Authorization": "Bearer {env:FIRECRAWL_API_KEY}"
+        }
+      },
+      "apify": {
+        "type": "remote",
+        "url": "https://mcp.apify.com"
+      },
+      "fetch": {
+        "type": "local",
+        "command": [
+          "uvx",
+          "mcp-server-fetch"
+        ],
+        "protocol": "auto",
+        "timeout": {
+          "startup": 60000
+        }
+      }
+    }
+  }
+}

@@ -21,7 +21,7 @@ KEYAKINAN = {"tinggi": "#5B8C5A", "sedang": "#D9A441", "rendah": "#C73E1D"}
 URGENSI = {"tinggi": "#C73E1D", "sedang": "#D9A441", "rendah": "#B9BDC4"}
 
 
-@st.cache_data
+@st.cache_data(ttl="1h")  # muat ulang otomatis tiap 1 jam agar tidak menyajikan data lama
 def load_csv(name):
     return pd.read_csv(f"data/{name}", encoding="utf-8-sig", dtype=str).fillna("")
 
@@ -46,6 +46,9 @@ halaman = st.sidebar.radio(
      "Pertanyaan Audiens", "Kalender Momen", "Sumber & Checklist"],
 )
 st.sidebar.markdown("---")
+if st.sidebar.button("Muat ulang data", icon=":material/refresh:", key="btn_refresh_data"):
+    st.cache_data.clear()
+    st.rerun()
 st.sidebar.caption(f"Riset untuk Impost Media (impostmedia.com), agensi digital marketing Kalsel. "
                    f"Periode data {PERIODE}. Riset terakhir {TGL_AMBIL}.")
 

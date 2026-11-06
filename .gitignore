@@ -19,6 +19,7 @@ __pycache__/
 
 data/_pytrends_raw*.json
 data/_instagram_trends_raw.json
+data/_perluasan_trends_raw.json
 data/_refresh_log.txt
 data/_arsip/
 *.log

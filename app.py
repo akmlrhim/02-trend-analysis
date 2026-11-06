@@ -1,7 +1,5 @@
 # -*- coding: utf-8 -*-
 """Dashboard riset konten Impost Media. Data mentah: folder data/, riset terakhir 6 Nov 2026."""
-from datetime import timedelta
-
 import pandas as pd
 import plotly.express as px
 import streamlit as st
@@ -16,7 +14,6 @@ NETRAL = "#3D5A6C"
 AKSEN = "#C73E1D"
 SENTIMEN = {"positif": "#5B8C5A", "netral": "#9AA0A6", "negatif": "#C73E1D"}
 STATUS = {"berhasil": "#5B8C5A", "sebagian": "#D9A441", "gagal": "#C73E1D", "dilewati": "#B9BDC4"}
-RELEVANSI = {"tinggi": "#C73E1D", "sedang": "#D9A441", "rendah": "#B9BDC4"}
 KEYAKINAN = {"tinggi": "#5B8C5A", "sedang": "#D9A441", "rendah": "#C73E1D"}
 URGENSI = {"tinggi": "#C73E1D", "sedang": "#D9A441", "rendah": "#B9BDC4"}
 
@@ -28,20 +25,18 @@ def load_csv(name):
 
 tren = load_csv("tren_topik.csv")
 tanya = load_csv("pertanyaan_audiens.csv")
-kalender = load_csv("kalender_momen.csv")
 checklist = load_csv("_sumber_checklist.csv")
 isu = load_csv("isu_impost.csv")
 ide = load_csv("ide_konten_impost.csv")
 
 for df in (tren, tanya):
     df["tanggal_ambil"] = pd.to_datetime(df["tanggal_ambil"], errors="coerce")
-kalender["tanggal_dt"] = pd.to_datetime(kalender["tanggal"], errors="coerce")
 checklist["jumlah_baris"] = pd.to_numeric(checklist["jumlah_baris"], errors="coerce")
 
 halaman = st.sidebar.radio(
     "Navigasi",
     ["Ringkasan", "Isu & Ide Konten", "Tren Topik",
-     "Pertanyaan Audiens", "Kalender Momen", "Sumber & Checklist"],
+     "Pertanyaan Audiens", "Sumber & Checklist"],
 )
 st.sidebar.markdown("---")
 if st.sidebar.button("Muat ulang data", icon=":material/refresh:", key="btn_refresh_data"):
@@ -217,43 +212,6 @@ elif halaman == "Pertanyaan Audiens":
         st.dataframe(d[["kategori", "pertanyaan_atau_keluhan", "sumber",
                         "frekuensi_atau_jumlah_mention", "source_url"]],
                      width='stretch', height=460)
-
-# ============ KALENDER MOMEN ============
-elif halaman == "Kalender Momen":
-    st.title("Kalender Momen 60 Hari")
-    st.caption("Momen yang layak disiapkan lebih awal, dari 7 Nov 2026 sampai 5 Jan 2027. Warna menunjukkan relevansi.")
-
-    f1, f2 = st.columns(2)
-    jenis = f1.multiselect("Jenis momen", sorted(kalender["jenis"].unique()),
-                           default=sorted(kalender["jenis"].unique()))
-    rel = f2.multiselect("Relevansi", ["tinggi", "sedang", "rendah"], default=["tinggi", "sedang", "rendah"])
-    d = kalender[kalender["jenis"].isin(jenis) & kalender["relevansi"].isin(rel)].copy()
-    d = d.sort_values("tanggal_dt")
-
-    if d.empty:
-        st.info("Tidak ada momen pada filter ini. Pilih jenis atau relevansi lain.")
-    else:
-        d["akhir"] = d["tanggal_dt"] + timedelta(days=1)
-        fig = px.timeline(d, x_start="tanggal_dt", x_end="akhir", y="nama_momen",
-                          color="relevansi", color_discrete_map=RELEVANSI,
-                          category_orders={"relevansi": ["tinggi", "sedang", "rendah"]},
-                          title=f"Momen apa saja dalam 60 hari ke depan? ({len(d)} momen)")
-        fig.update_yaxes(autorange="reversed")
-        fig.update_layout(height=max(420, 26 * len(d) + 100), margin=dict(l=10, r=10, t=42, b=10))
-        st.plotly_chart(fig, width='stretch')
-
-        a, b = st.columns(2)
-        with a:
-            st.plotly_chart(barh(d, "jenis", "Jenis momen apa yang paling banyak?"), width='stretch')
-        with b:
-            tinggi = d[d["relevansi"] == "tinggi"]
-            st.markdown(f"### Prioritas tinggi ({len(tinggi)} momen)")
-            for _, r in tinggi.iterrows():
-                st.markdown(f"- **{r['tanggal']}**: {r['nama_momen']}")
-
-        st.markdown("### Daftar lengkap")
-        st.dataframe(d[["tanggal", "nama_momen", "jenis", "relevansi", "catatan", "source_url"]],
-                     width='stretch', height=420)
 
 # ============ SUMBER & CHECKLIST ============
 else:

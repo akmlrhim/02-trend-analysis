@@ -2,7 +2,7 @@
 """Refresh mingguan data tren untuk agensi digital marketing.
 Mengambil data baru (trends, berita industri, X/TikTok trending, autocomplete),
 menambahkan baris relevan-industri ke CSV yang sudah ada (dengan dedupe),
-lalu menormalisasi format. File kalender/checklist/referensi tidak diubah.
+lalu menormalisasi format. File checklist tidak diubah.
 Jalankan dari root: python scripts/refresh_weekly.py
 """
 import csv, re, subprocess, sys, urllib.parse, urllib.request

@@ -98,21 +98,6 @@ with open("data/pertanyaan_audiens.csv", "w", newline="", encoding="utf-8-sig") 
 kosong_url2 = sum(1 for r in d2 if not r["source_url"])
 print(f"pertanyaan_audiens.csv: {len(d2)} baris | sumber unik: {len({r['sumber'] for r in d2})} | source_url kosong: {kosong_url2}")
 
-# ---------- DATASET 5: kalender_momen.csv ----------
-H5 = ["tanggal", "nama_momen", "jenis", "relevansi", "catatan", "source_url"]
-d5 = list(csv.DictReader(open("data/kalender_momen.csv", encoding="utf-8-sig")))
-JENIS_OK = {"hari_besar", "libur_nasional", "musim_belanja", "gajian", "event_industri", "event_viral"}
-map_jenis = {"hari libur": "libur_nasional"}
-for r in d5:
-    j = r["jenis"].strip().lower().replace(" ", "_")
-    r["jenis"] = j if j in JENIS_OK else map_jenis.get(j, j)
-    r["relevansi"] = r["relevansi"].strip().lower()
-    r["tanggal"] = r["tanggal"].strip()
-with open("data/kalender_momen.csv", "w", newline="", encoding="utf-8-sig") as f:
-    w = csv.DictWriter(f, fieldnames=H5); w.writeheader(); w.writerows(d5)
-bad5 = [r["jenis"] for r in d5 if r["jenis"] not in JENIS_OK]
-print(f"kalender_momen.csv: {len(d5)} baris | jenis di luar kamus: {bad5 or 'tidak ada'}")
-
 # ---------- CHECKLIST: jumlah_baris numerik ----------
 HC = ["dataset", "sumber", "status", "jumlah_baris", "tool_yang_dipakai", "alasan_jika_gagal"]
 ck = list(csv.DictReader(open("data/_sumber_checklist.csv", encoding="utf-8-sig")))

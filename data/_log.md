@@ -56,3 +56,23 @@ Karhutla Kalteng-Sumatera (51 ribu personel BNPB, helikopter TNI jatuh, oranguta
 - Instagram: tidak ada data tren khusus Indonesia dari sumber publik; hanya agregator hashtag global (ditandai sebagian).
 - Review pelanggan (Google Maps/Tokopedia/Shopee) dilewati: mode umum tanpa industri, review tanpa konteks produk tidak relevan.
 - Berita Google News menggunakan URL redirect news.google.com (valid, tapi panjang).
+
+## 10 Nov 2026 — Analisa konten winning Impost Media
+- Ditambahkan folder data/konten_winning/: tiktok_impostmedia.csv (225 post), instagram_impostmedia.csv (223 post), analisis_konten_winning.md.
+- Sumber: Apify (clockworks/tiktok-scraper, apify/instagram-scraper) via MCP; hanya akun Impost (IG @impostmedia 17.588 followers, TikTok @impostmedia 177 followers, kolaborasi @impeeps.ofc).
+- Facebook tidak dianalisa: tidak ada halaman publik terdeteksi (scrape facebook.com/impostmedia → not available; pencarian posts/pages → 0).
+- Skrip proses: scripts/scraping/proses_winning.py & dalami_impost.py (klasifikasi winning = kuartil atas views/engagement).
+
+## 10 Nov 2026 — Analisa konten winning Facebook @propeaagency
+- Halaman FB resmi Impost Media ternyata ada: facebook.com/propeaagency (post ber-hashtag #impostmedia). Discrape via Apify `apify/facebook-posts-scraper`: 236 post Mar 2025-Okt 2026, raw di data/konten_winning/_raw/fb_propeaagency.
+- Output: data/konten_winning/facebook_propeaagency.csv (236 post; 48 WINNING, 48 losing, 94 normal, 46 tanpa_data) + baris baru di ringkasan_akun.csv.
+- Catatan metrik: FB menyembunyikan like/komentar di hampir semua post (hanya 7 post punya angka like, komentar 0 terlihat) → klasifikasi winning pakai views; post foto/tekstual tanpa views = tanpa_data. Median views 9; outliner 1 reels jualan Des 2025 (27.186 views).
+- Skrip proses: scripts/scraping/proses_winning_fb.py (aturan topik & waktu sama dengan proses_winning.py).
+- Dashboard: halaman Konten Winning kini punya tab Facebook + metrik FB @propeaagency, dan baris FB ikut di "Daftar konten winning". Metodologi diperbarui (poin "FB tidak dianalisa" dihapus).
+
+## 10 Nov 2026 — Analisa IG @impeeps.ofc diperlengkapi + perbaikan caption kosong
+- Masalah lama: raw `ig_impeeps` tidak menyimpan caption/hashtags (teks kosong semua, semua topik "lainnya", label chart viral "nan...") dan videoViewCount null.
+- Scrape ulang @impeeps.ofc via Apify `apify/instagram-scraper` (139 post, Feb-Okt 2026, dengan caption; views tetap tidak tersedia). Raw baru: data/konten_winning/_raw/ig_impeeps_v2.
+- proses_winning.py kini menggabungkan caption/hashtags v2 ke instagram_impeeps.csv per shortCode (135/180 post terisi; post Okt 2025-Jan 2026 tetap tanpa caption).
+- Dashboard: tab Instagram dipecah jadi sub-tab "@impostmedia" dan "@impeeps.ofc". Analisa @impeeps.ofc: status winning, 8 reels viral (likes), hari & bulan posting (volume), total komentar per bulan, 10 reels paling banyak dikomentari. Chart median engagement per hari/bulan/topik sengaja tidak dipakai untuk impeeps karena like tersembunyi membuat median-nya 0 (chart tampak kosong).
+- Label cuplikan teks yang kosong kini tampil "(caption tidak tersimpan)" alih-alih "nan...".

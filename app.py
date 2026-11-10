@@ -87,6 +87,23 @@ def tombol_ambil_data():
                 status.update(label="Proses melebihi 15 menit, dihentikan", state="error")
 
 
+# Chart tampil statis: zoom/pan drag & scroll dinonaktifkan, tapi tombol toolbar
+# (zoom in, zoom out, reset, unduh PNG) tetap tersedia.
+PLOTLY_CONFIG = {
+    "displayModeBar": True,
+    "displaylogo": False,
+    "scrollZoom": False,
+    "doubleClick": False,
+    "modeBarButtonsToRemove": ["zoom2d", "pan2d", "select2d", "lasso2d"],
+}
+
+
+def graf(fig):
+    """st.plotly_chart tanpa interaksi drag/scroll; toolbar zoom in/out tetap ada."""
+    fig.update_layout(dragmode=False)
+    st.plotly_chart(fig, config=PLOTLY_CONFIG, width="stretch")
+
+
 def barh(df, kolom, pertanyaan, warna=NETRAL):
     """Bar horizontal: judulnya pertanyaan yang dijawab chart."""
     vc = df[kolom].value_counts().reset_index()
@@ -120,11 +137,9 @@ if halaman == "Tren Topik":
     else:
         a, b = st.columns(2)
         with a:
-            st.plotly_chart(barh(d, "kategori", f"Kategori mana yang paling banyak? ({len(d)} baris)"),
-                            width='stretch')
+            graf(barh(d, "kategori", f"Kategori mana yang paling banyak? ({len(d)} baris)"))
         with b:
-            st.plotly_chart(barh(d, "sumber", "Sumber mana yang paling produktif?", NETRAL),
-                            width='stretch')
+            graf(barh(d, "sumber", "Sumber mana yang paling produktif?", NETRAL))
 
         st.markdown("### Topik yang sedang naik")
         naik = d[d["indikator_tren"] == "naik"]
@@ -197,7 +212,7 @@ elif halaman == "Konten Winning":
                          color_discrete_map={"WINNING": AKSEN, "normal": NETRAL, "losing": "#B9BDC4"},
                          title="Seberapa banyak post yang winning?", text="jumlah")
             fig.update_layout(height=360, showlegend=False, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
         with a2:
             agg = tt_win.groupby("topik").agg(median_views=("views", "median"), n=("views", "size")).reset_index()
             agg = agg.sort_values("median_views")
@@ -206,7 +221,7 @@ elif halaman == "Konten Winning":
                          title="Topik mana yang paling banyak dilihat? (median views)")
             fig.update_traces(textposition="outside")
             fig.update_layout(height=360, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
 
         b1, b2 = st.columns(2)
         with b1:
@@ -215,7 +230,7 @@ elif halaman == "Konten Winning":
                          color_discrete_map={"slideshow": AKSEN, "video": NETRAL}, text="median_views",
                          title="Slideshow 2,8x lebih banyak dilihat daripada video")
             fig.update_layout(height=360, showlegend=False, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
         with b2:
             urut_hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
             agg = tt_win.groupby("hari").agg(median_views=("views", "median"), n=("views", "size")).reset_index()
@@ -225,7 +240,7 @@ elif halaman == "Konten Winning":
                          title="Hari apa posting paling banyak dilihat? (median views)")
             fig.update_traces(textposition="outside")
             fig.update_layout(height=360, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
 
         c1, c2 = st.columns(2)
         with c1:
@@ -235,7 +250,7 @@ elif halaman == "Konten Winning":
                             title="Kapan waktu posting paling 'panas'? (median views hari x jam WITA)",
                             labels=dict(x="jam (WITA)", y="hari", color="median views"))
             fig.update_layout(height=380, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
         with c2:
             tt_win["bulan"] = pd.to_datetime(tt_win["tanggal"]).dt.strftime("%Y-%m")
             agg = tt_win.groupby("bulan").agg(median_views=("views", "median"), n=("views", "size")).reset_index()
@@ -243,7 +258,7 @@ elif halaman == "Konten Winning":
                           title="Arah performa akun: median views per bulan (naik, tapi frekuensi turun)")
             fig.update_layout(height=380, margin=dict(l=10, r=10, t=42, b=10),
                               xaxis_tickangle=-45)
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
 
         d1, d2 = st.columns(2)
         with d1:
@@ -253,7 +268,7 @@ elif halaman == "Konten Winning":
             fig = px.bar(agg, x="htag_bin", y="median_views", color_discrete_sequence=[NETRAL], text="median_views",
                          title="Berapa jumlah hashtag optimal? (median views)")
             fig.update_layout(height=340, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
         with d2:
             tt_win["tag_brand"] = tt_win["hashtags"].where(tt_win["hashtags"].notna(), "").str.lower().str.contains("impostmedia")
             agg = tt_win.groupby("tag_brand").agg(median_views=("views", "median"), n=("views", "size")).reset_index()
@@ -262,7 +277,7 @@ elif halaman == "Konten Winning":
                          color_discrete_map={"pakai #impostmedia": AKSEN, "tanpa #impostmedia": "#B9BDC4"},
                          text="median_views", title="Post dengan tag brand #impostmedia = 2x views")
             fig.update_layout(height=340, showlegend=False, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
 
         st.markdown("#### 15 konten TikTok winning teratas")
         top_tt = tt_win.nlargest(15, "views")[
@@ -292,7 +307,7 @@ elif halaman == "Konten Winning":
                      text="median_engagement",
                      title="Median engagement per jenis akun — siapa mesin winning-nya?")
         fig.update_layout(height=380, showlegend=False, margin=dict(l=10, r=10, t=42, b=10))
-        st.plotly_chart(fig, width='stretch')
+        graf(fig)
 
         sub_utm, sub_peeps = st.tabs(["@impostmedia", "@impeeps.ofc"])
 
@@ -322,7 +337,7 @@ elif halaman == "Konten Winning":
                              color_discrete_map={"WINNING": AKSEN, "normal": NETRAL, "losing": "#B9BDC4"},
                              title="Seberapa banyak reels @impeeps.ofc yang winning?", text="jumlah")
                 fig.update_layout(height=360, showlegend=False, margin=dict(l=10, r=10, t=42, b=10))
-                st.plotly_chart(fig, width='stretch')
+                graf(fig)
             with p2:
                 viral = ig_peeps.nlargest(8, "likes")[["likes", "komentar", "teks", "url"]].copy()
                 viral["teks"] = viral["teks"].fillna("(caption tidak tersimpan)").astype(str).str.slice(0, 60) + "..."
@@ -332,7 +347,7 @@ elif halaman == "Konten Winning":
                 fig.update_layout(height=360, margin=dict(l=10, r=10, t=42, b=10),
                                   yaxis_title="", xaxis_title="likes")
                 fig.update_traces(textposition="outside")
-                st.plotly_chart(fig, width='stretch')
+                graf(fig)
 
             q1, q2 = st.columns(2)
             with q1:
@@ -342,7 +357,7 @@ elif halaman == "Konten Winning":
                 fig = px.bar(vc, x="hari", y="jumlah", color_discrete_sequence=[NETRAL], text="jumlah",
                              title="Hari apa @impeeps.ofc paling rajin posting? (jumlah post)")
                 fig.update_layout(height=340, margin=dict(l=10, r=10, t=42, b=10))
-                st.plotly_chart(fig, width='stretch')
+                graf(fig)
             with q2:
                 bulan_kom = (ig_peeps.assign(bulan=ig_peeps["tanggal_jakarta"].astype(str).str[:7])
                              .groupby("bulan")["komentar"].sum().reset_index())
@@ -350,7 +365,7 @@ elif halaman == "Konten Winning":
                              title="Bulan apa yang paling banyak dikomentari? (total komentar)")
                 fig.update_layout(height=340, margin=dict(l=10, r=10, t=42, b=10),
                                   xaxis_title="", yaxis_title="komentar", xaxis_tickangle=-45)
-                st.plotly_chart(fig, width='stretch')
+                graf(fig)
 
             kom_p = ig_peeps[ig_peeps["komentar"] > 0].nlargest(10, "komentar")[
                 ["tanggal_jakarta", "likes", "komentar", "teks", "url"]].copy()
@@ -379,7 +394,7 @@ elif halaman == "Konten Winning":
                                              "losing": "#B9BDC4", "tanpa_data": "#DDE1E4"},
                          title="Seberapa banyak post yang winning? (berdasar views)", text="jumlah")
             fig.update_layout(height=360, showlegend=False, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
         with g2:
             agg = fb_win.groupby("topik").agg(median_views=("views", "median"), n=("views", "size")).reset_index()
             agg = agg.sort_values("median_views")
@@ -388,7 +403,7 @@ elif halaman == "Konten Winning":
                          title="Topik mana yang paling banyak dilihat? (median views)")
             fig.update_traces(textposition="outside")
             fig.update_layout(height=360, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
 
         h1, h2 = st.columns(2)
         with h1:
@@ -398,7 +413,7 @@ elif halaman == "Konten Winning":
                          color_discrete_map={"reels": AKSEN, "video": NETRAL}, text="median_views",
                          title="Format mana yang paling banyak dilihat? (median views)")
             fig.update_layout(height=340, showlegend=False, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
         with h2:
             urut_hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu", "Minggu"]
             agg = fb_win.groupby("hari").agg(median_views=("views", "median"), n=("views", "size")).reset_index()
@@ -408,7 +423,7 @@ elif halaman == "Konten Winning":
                          title="Hari apa posting paling banyak dilihat? (median views)")
             fig.update_traces(textposition="outside")
             fig.update_layout(height=340, margin=dict(l=10, r=10, t=42, b=10))
-            st.plotly_chart(fig, width='stretch')
+            graf(fig)
 
         st.info(
             "Catatan: FB menyembunyikan jumlah like/komentar di hampir semua post (hanya 7 dari 236 post "

@@ -76,3 +76,10 @@ Karhutla Kalteng-Sumatera (51 ribu personel BNPB, helikopter TNI jatuh, oranguta
 - proses_winning.py kini menggabungkan caption/hashtags v2 ke instagram_impeeps.csv per shortCode (135/180 post terisi; post Okt 2025-Jan 2026 tetap tanpa caption).
 - Dashboard: tab Instagram dipecah jadi sub-tab "@impostmedia" dan "@impeeps.ofc". Analisa @impeeps.ofc: status winning, 8 reels viral (likes), hari & bulan posting (volume), total komentar per bulan, 10 reels paling banyak dikomentari. Chart median engagement per hari/bulan/topik sengaja tidak dipakai untuk impeeps karena like tersembunyi membuat median-nya 0 (chart tampak kosong).
 - Label cuplikan teks yang kosong kini tampil "(caption tidak tersimpan)" alih-alih "nan...".
+
+## 21 Nov 2026 — Ambil data terbaru via MCP browser (Playwright)
+- MCP Apify sudah tidak tersedia di sesi ini; Crawl4AI menolak Instagram (login wall) dan `execute_js` nonaktif. Playwright MCP berhasil membaca halaman publik tanpa login.
+- Hasil: 5 post baru sejak scrape 10 Nov — IG @impostmedia 3 (13 & 18 Nov), IG @impeeps.ofc 1 (11 Nov), FB @propeaagency 1 (18 Nov). TikTok: 25 video teratas di profil semuanya sudah ada di dataset (tidak ada video baru).
+- Raw: data/konten_winning/_raw/terbaru_2026-11-21.json. Skrip: scripts/scraping/append_terbaru.py (dedupe shortCode/id, aman dijalankan ulang).
+- Keterbatasan: tamu tidak melihat like/reach IG & FB → metrik kosong, status `tanpa_data`, klasifikasi WINNING lama tidak diubah. Ringkasan akun: post 204→207 (IG utama), 180→181 (impeeps), 236→237 (FB).
+- Catatan: hanya 12 post IG terakhir yang termuat untuk tamu; untuk menambah data secara substansial perlu akun/benchmark lain atau akses login/API.

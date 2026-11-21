@@ -8,6 +8,8 @@ env/
 
 .opencode/
 .playwright-mcp/
+opencode.json
+AGENTS.md
 
 graphify-out/
 

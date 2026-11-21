@@ -83,3 +83,9 @@ Karhutla Kalteng-Sumatera (51 ribu personel BNPB, helikopter TNI jatuh, oranguta
 - Raw: data/konten_winning/_raw/terbaru_2026-11-21.json. Skrip: scripts/scraping/append_terbaru.py (dedupe shortCode/id, aman dijalankan ulang).
 - Keterbatasan: tamu tidak melihat like/reach IG & FB → metrik kosong, status `tanpa_data`, klasifikasi WINNING lama tidak diubah. Ringkasan akun: post 204→207 (IG utama), 180→181 (impeeps), 236→237 (FB).
 - Catatan: hanya 12 post IG terakhir yang termuat untuk tamu; untuk menambah data secara substansial perlu akun/benchmark lain atau akses login/API.
+
+## 21 Nov 2026 — Isu terkini ditambahkan ke tren_topik.csv
+- Sumber: Google News RSS 7 hari (diambil & diverifikasi via MCP Crawl4AI), empat query: Campaign Indonesia, digital marketing/iklan digital, TikTok/Instagram/Meta Ads, UMKM/e-commerce/marketplace.
+- Skrip: scripts/scraping/refresh_isu_terkini.py — filter relevansi industri, blokir politik/olahraga/selebriti & PR award, dedupe judul, ekstraksi persentase ke `skor_atau_volume`.
+- Hasil: +45 baris (80 → 125). Isu utama: iklan kreator hanya 2% konversi langsung, iklan digital Indonesia +16,9%, TikTok menggeser Instagram, Tokopedia–TikTok Shop (12.12, Ramadan 2027, saldo seller), affiliate video +102%, fitur Edit Story IG, GTA VI sebagai momen pemasaran, ASEAN DEFA & pajak e-commerce UMKM.
+- X trending & Google Trends Trending Now tidak dimasukkan: hasilnya didominasi olahraga/awards, bukan industri agensi.
